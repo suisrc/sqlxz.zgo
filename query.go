@@ -4,16 +4,10 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-
-	"github.com/jmoiron/sqlx"
-)
-
-var (
-	TBL = "zgo_"
 )
 
 // QueryGet 查询单个
-func QueryGet(sqlx *sqlx.DB, srs interface{}, table, after string, sps ...interface{}) error {
+func QueryGet(sqlx EntityDB, srs interface{}, table, after string, sps ...interface{}) error {
 	slc := SelectColumns(srs)
 	sqr := fmt.Sprintf(`select %s from %s%s %s`, slc, TBL, table, after)
 	err := sqlx.Get(srs, sqr, sps...)
@@ -21,7 +15,7 @@ func QueryGet(sqlx *sqlx.DB, srs interface{}, table, after string, sps ...interf
 }
 
 // QuerySelect 查询集合
-func QuerySelect(sqlx *sqlx.DB, srs interface{}, table, after string, sps ...interface{}) error {
+func QuerySelect(sqlx ArrayDB, srs interface{}, table, after string, sps ...interface{}) error {
 	val := reflect.ValueOf(srs)
 	vty := val.Type().Elem().Elem()
 	vpc := reflect.New(vty)
@@ -33,7 +27,7 @@ func QuerySelect(sqlx *sqlx.DB, srs interface{}, table, after string, sps ...int
 }
 
 // QueryGet 查询单个
-func QueryGetTBL(sqlx *sqlx.DB, srs interface{}, sql string, sps ...interface{}) error {
+func QueryGetTBL(sqlx EntityDB, srs interface{}, sql string, sps ...interface{}) error {
 	slc := SelectColumns(srs)
 	sqr := fmt.Sprintf(`select %s from %s`, slc, strings.ReplaceAll(sql, "[TBL]", TBL))
 	err := sqlx.Get(srs, sqr, sps...)
@@ -41,7 +35,7 @@ func QueryGetTBL(sqlx *sqlx.DB, srs interface{}, sql string, sps ...interface{})
 }
 
 // QuerySelect 查询集合
-func QuerySelectTBL(sqlx *sqlx.DB, srs interface{}, sql string, sps ...interface{}) error {
+func QuerySelectTBL(sqlx ArrayDB, srs interface{}, sql string, sps ...interface{}) error {
 	val := reflect.ValueOf(srs)
 	vty := val.Type().Elem().Elem()
 	vpc := reflect.New(vty)
@@ -53,7 +47,7 @@ func QuerySelectTBL(sqlx *sqlx.DB, srs interface{}, sql string, sps ...interface
 }
 
 // QuerySelect 查询集合
-func QuerySelectDistinctTBL(sqlx *sqlx.DB, srs interface{}, sql string, sps ...interface{}) error {
+func QuerySelectDistinctTBL(sqlx ArrayDB, srs interface{}, sql string, sps ...interface{}) error {
 	val := reflect.ValueOf(srs)
 	vty := val.Type().Elem().Elem()
 	vpc := reflect.New(vty)
