@@ -184,6 +184,50 @@ func SelectColumns(obj interface{}) string {
 	return c.String()[1:]
 }
 
+// SelectColumns select column
+func SelectColumnX(obj interface{}, pre string) string {
+	t := reflect.TypeOf(obj)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	if t.Kind() != reflect.Struct {
+		return ""
+	}
+	c := strings.Builder{}
+	for i := 0; i < t.NumField(); i++ {
+		tag := t.Field(i).Tag.Get("db")
+		if tag == "-" {
+			continue
+		}
+		if idx := strings.Index(tag, ","); idx > 0 {
+			tag = tag[:idx]
+		}
+		tag = strings.TrimSpace(tag)
+
+		column := tag
+		if column == "" {
+			column = strings.ToLower(t.Field(i).Name)
+		}
+		c.WriteString(", ")
+
+		if tbl := strings.TrimSpace(t.Field(i).Tag.Get("tbl")); tbl != "" && tbl != "-" {
+			c.WriteString(tbl)
+			if !strings.ContainsRune(tbl, '.') {
+				c.WriteRune('.')
+				c.WriteString(column)
+			}
+			c.WriteString(" as ")
+		} else if pre != "" {
+			c.WriteString(pre)
+			c.WriteRune('.')
+			c.WriteString(column)
+			c.WriteString(" as ")
+		}
+		c.WriteString(column)
+	}
+	return c.String()[1:]
+}
+
 // CreateUpdateSQLByNamedAndSkipNil create update sql by named
 // 忽略空字段, 空字段不进行更新, 如果需要前置更新空字段, 直接使用 CreateUpdateSQLByNamed
 func CreateUpdateSQLByNamedAndSkipNil(tic TableIdxColumn, obj interface{}) (string, map[string]interface{}, error) {
