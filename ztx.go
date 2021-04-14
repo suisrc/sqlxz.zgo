@@ -11,14 +11,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// IsNotFound of sqlx
-func IsNotFound(err error) bool {
-	if err == nil {
-		return false
-	}
-	return "sql: no rows in result set" == err.Error()
-}
-
 // TableIdxColumn id
 // 1.Column="" 或者 Column = "id", 如果ID > 0 update, 否则 create
 // 2.Update直接决定 update 或者 create
@@ -372,6 +364,11 @@ func PickProxy(obj interface{}) interface{} {
 	if obj == nil {
 		return nil
 	}
+	vi := reflect.ValueOf(obj)
+	if vi.Kind() == reflect.Ptr && vi.IsNil() {
+		return nil
+	}
+
 	var b bool
 	var v interface{}
 	switch obj.(type) {
